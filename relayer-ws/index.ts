@@ -1,15 +1,18 @@
-import { WebSocketServer, WebSocket } from "ws";
+import { WebSocketServer, WebSocket } from 'ws';
 
-const wss = new WebSocketServer({ port: 8080 });
-interface Room {
-  sockets: WebSocket[];
-}
+const wss = new WebSocketServer({ port: 3001 });
 
+const servers: WebSocket[] = [];
 
-wss.on("connection", function connection(ws) {
-  ws.on("error", console.error);
+wss.on('connection', function connection(ws) {
+  ws.on('error', console.error);
 
-  ws.on("message", function message(data: string) {
-   
+  servers.push(ws);
+
+  ws.on('message', function message(data: string) {
+    servers.map(socket => {
+        socket.send(data);
+    })
   });
+
 });
