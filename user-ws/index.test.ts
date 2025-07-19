@@ -1,4 +1,4 @@
-import { test, describe } from "bun:test";
+import { test, describe, expect } from "bun:test";
 
 const BACKEND_URL = "ws://localhost:8080";
 
@@ -24,7 +24,6 @@ describe("Chat application", () => {
       };
     });
 
-    console.log("hi hello both done");
     ws1.send(
       JSON.stringify({
         type: "join-room",
@@ -38,12 +37,27 @@ describe("Chat application", () => {
         room: "Room 1",
       })
     );
+    console.log("after sending the data join room ");
 
-    ws1.send(
-      JSON.stringify({
-        type: "chat",
-        room: "hi there",
-      })
-    );
+    await new Promise<void>((resolve, reject) => {
+      ws2.onmessage = ({ data }) => {
+        console.log(data);
+        const parsedData = JSON.parse(data);
+        expect(parsedData.type === "chat");
+        expect(parsedData.message === "Hi there");
+        resolve();
+        console.log("resolved onmessage");
+      };
+
+      ws1.send(
+        JSON.stringify({
+          type: "chat",
+          room: "Room 1",
+          message: "Hi there",
+        })
+      );
+    });
+
   });
+  console.log("control reached the last");
 });
